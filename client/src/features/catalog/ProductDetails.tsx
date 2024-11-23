@@ -1,13 +1,39 @@
 import { useParams } from "react-router-dom"
 import { Button, Divider, Grid2, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
 import { useFetchProductDetailsQuery } from "./catalogApi";
+import { useAddBasketItemMutation, useFetchBasketQuery, useRemoveBasketItemMutation } from "../basket/basketApi";
+import { ChangeEvent, useEffect, useState } from "react";
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const [removeBasketItem] = useRemoveBasketItemMutation();
+  const [addBasketItem] = useAddBasketItemMutation();
+  const {data: basket} = useFetchBasketQuery();
+  const item = basket?.items.find(x => x.productId === +id!);
+  const [quantity, setQuantity] = useState(0); 
+
+  useEffect(() => {
+    if (item) setQuantity(item.quantity);
+  }, [item]);
 
   const {data: product, isLoading} = useFetchProductDetailsQuery(id ? +id : 0)
 
   if (!product || isLoading) return <div>Loading...</div>
+
+  const handleUpdateBasket = () => {
+    const updatedQuantity = item ? Math.abs(quantity - item.quantity) : quantity;
+    if (!item || quantity > item.quantity) {
+      addBasketItem({product, quantity: updatedQuantity})
+    } else {
+      removeBasketItem({productId: product.id, quantity: updatedQuantity})
+    }
+  }
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = +event.currentTarget.value;
+
+    if (value >= 0) setQuantity(value)
+  }
 
   const productDetails = [
     { label: 'Name', value: product.name },
@@ -48,18 +74,21 @@ export default function ProductDetails() {
               type="number"
               label='Quantity in basket'
               fullWidth
-              defaultValue={1}
+              value={quantity}
+              onChange={handleInputChange}
             />
           </Grid2>
           <Grid2 size={6}>
             <Button
+              onClick={handleUpdateBasket}
+              disabled={quantity === item?.quantity || !item && quantity === 0}
               sx={{height: '55px'}}
               color="primary"
               size="large"
               variant="contained"
               fullWidth
             >
-              Add to Basket
+              {item ? 'Update quantity' : 'Add to basket'}
             </Button>
           </Grid2>
         </Grid2>
