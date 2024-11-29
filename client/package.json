@@ -20,6 +20,7 @@
     "@reduxjs/toolkit": "^2.3.0",
     "@stripe/react-stripe-js": "^3.0.0",
     "@stripe/stripe-js": "^5.2.0",
+    "date-fns": "^4.1.0",
     "js-cookie": "^3.0.5",
     "react": "^19.0.0-rc-b01722d5-20241114",
     "react-dom": "^19.0.0-rc-b01722d5-20241114",
