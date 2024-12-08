@@ -24,7 +24,7 @@ jobs:
       - name: Install deps and build client app
         run: |
           cd client
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Set up .NET Core
